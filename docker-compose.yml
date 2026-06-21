@@ -1,0 +1,82 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: chat-postgres
+    environment:
+      POSTGRES_USER: chat
+      POSTGRES_PASSWORD: chat_pass
+      POSTGRES_DB: chatdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chat -d chatdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: chat-auth
+    ports:
+      - "3001:3001"
+    environment:
+      - AUTH_PORT=3001
+      - DATABASE_URL=postgresql://chat:chat_pass@postgres:5432/chatdb
+      - JWT_SECRET=chat_access_secret_2026_cefet
+      - JWT_REFRESH_SECRET=chat_refresh_secret_2026_cefet
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  message-service:
+    build:
+      context: ./message-service
+      dockerfile: Dockerfile
+    container_name: chat-messages
+    ports:
+      - "3002:3002"
+    environment:
+      - MSG_PORT=3002
+      - DATABASE_URL=postgresql://chat:chat_pass@postgres:5432/chatdb
+      - JWT_SECRET=chat_access_secret_2026_cefet
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: chat-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - auth-service
+      - message-service
+    restart: unless-stopped
+
+volumes:
+  pg-data:
