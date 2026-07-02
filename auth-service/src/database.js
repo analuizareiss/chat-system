@@ -11,7 +11,6 @@ pool.on('error', (err) => {
   console.error('Unexpected PostgreSQL pool error:', err);
 });
 
-// Cria as tabelas se não existirem
 async function initDatabase() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (

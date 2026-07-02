@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 
 const ACCESS_SECRET = process.env.JWT_SECRET || 'chat_access_secret_2026_cefet';
 
-// Inline JWT verification (avoids HTTP call to auth-service for every request)
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
@@ -19,7 +18,6 @@ function authMiddleware(req, res, next) {
   }
 }
 
-// For WebSocket connections
 function verifySocketToken(token) {
   try {
     return jwt.verify(token, ACCESS_SECRET);

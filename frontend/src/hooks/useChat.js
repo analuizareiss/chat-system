@@ -13,7 +13,6 @@ export function useChat() {
   const [loadingRooms, setLoadingRooms] = useState(false);
   const typingTimers = useRef({});
 
-  // Load all user rooms
   const loadRooms = useCallback(async () => {
     setLoadingRooms(true);
     try {
@@ -26,7 +25,6 @@ export function useChat() {
     }
   }, []);
 
-  // Load messages for a room
   const loadMessages = useCallback(async (roomId) => {
     if (messages[roomId]) return; // already loaded
     try {
@@ -37,7 +35,6 @@ export function useChat() {
     }
   }, [messages]);
 
-  // Open or activate a room
   const openRoom = useCallback(async (room) => {
     setActiveRoom(room);
     await loadMessages(room.id);
@@ -45,12 +42,10 @@ export function useChat() {
     if (socket) socket.emit('room:join', { roomId: room.id });
   }, [loadMessages, getSocket]);
 
-  // Start a direct chat
   const startDirectChat = useCallback(async (targetUser) => {
     try {
       const { data } = await messageService.getOrCreateDirect(targetUser.id, targetUser.username);
       const room = data.room;
-      // Refresh room name for display
       const enriched = { ...room, _peerUsername: targetUser.username, _peerColor: targetUser.avatar_color };
       setRooms((prev) => {
         const exists = prev.find((r) => r.id === room.id);
@@ -64,7 +59,6 @@ export function useChat() {
     }
   }, [openRoom]);
 
-  // Create group
   const createGroup = useCallback(async (name, memberIds) => {
     try {
       const { data } = await messageService.createGroup(name, memberIds);
@@ -76,14 +70,12 @@ export function useChat() {
     }
   }, [openRoom]);
 
-  // Send message via socket
   const sendMessage = useCallback((roomId, content) => {
     const socket = getSocket();
     if (!socket) return;
     socket.emit('message:send', { roomId, content });
   }, [getSocket]);
 
-  // Typing indicators
   const startTyping = useCallback((roomId) => {
     const socket = getSocket();
     if (!socket) return;
@@ -101,7 +93,6 @@ export function useChat() {
     socket.emit('typing:stop', { roomId });
   }, [getSocket]);
 
-  // Socket event listeners
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
@@ -112,7 +103,6 @@ export function useChat() {
         [message.room_id]: [...(prev[message.room_id] || []), message],
       }));
 
-      // Update last_message in rooms list
       setRooms((prev) =>
         prev.map((r) =>
           r.id === message.room_id

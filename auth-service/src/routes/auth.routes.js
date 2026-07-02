@@ -16,7 +16,6 @@ const loginSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-// POST /auth/register
 router.post('/register', async (req, res) => {
   const { error, value } = registerSchema.validate(req.body);
   if (error) return res.status(400).json({ error: error.details[0].message });
@@ -45,7 +44,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// POST /auth/login
 router.post('/login', async (req, res) => {
   const { error, value } = loginSchema.validate(req.body);
   if (error) return res.status(400).json({ error: error.details[0].message });
@@ -73,7 +71,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// POST /auth/refresh
 router.post('/refresh', async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) return res.status(400).json({ error: 'Refresh token required' });
@@ -101,7 +98,6 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
-// POST /auth/logout
 router.post('/logout', async (req, res) => {
   const { refreshToken, userId } = req.body;
   try {
@@ -111,7 +107,6 @@ router.post('/logout', async (req, res) => {
   return res.json({ message: 'Logged out successfully' });
 });
 
-// GET /auth/validate
 router.get('/validate', async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
@@ -128,7 +123,6 @@ router.get('/validate', async (req, res) => {
   }
 });
 
-// GET /auth/users
 router.get('/users', async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
