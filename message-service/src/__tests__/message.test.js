@@ -4,6 +4,7 @@ process.env.DATABASE_URL = process.env.TEST_DATABASE_URL
 
 const request = require('supertest');
 const { pool, initDatabase } = require('../database');
+const { connectRedis, disconnectRedis, dataClient } = require('../redis');
 const { app } = require('../index');
 const jwt = require('jsonwebtoken');
 
@@ -13,15 +14,18 @@ const makeToken = (userId, username) =>
 
 beforeAll(async () => {
   await initDatabase();
+  await connectRedis();
   await pool.query('TRUNCATE messages, room_members, rooms CASCADE');
+  await dataClient.del('chat:online_users');
 });
 
 afterAll(async () => {
   await pool.query('TRUNCATE messages, room_members, rooms CASCADE');
   await pool.end();
+  await disconnectRedis();
 });
 
-describe('Message Service — PostgreSQL', () => {
+describe('Message Service - PostgreSQL', () => {
   const user1 = { userId: 'user-pg-1', username: 'alice' };
   const user2 = { userId: 'user-pg-2', username: 'bob' };
   const token1 = makeToken(user1.userId, user1.username);
@@ -92,9 +96,9 @@ describe('Message Service — PostgreSQL', () => {
       const res = await request(app)
         .post(`/api/rooms/${directRoomId}/messages`)
         .set('Authorization', `Bearer ${token1}`)
-        .send({ content: 'Olá Postgres!' });
+        .send({ content: 'Ola Postgres!' });
       expect(res.status).toBe(201);
-      expect(res.body.message.content).toBe('Olá Postgres!');
+      expect(res.body.message.content).toBe('Ola Postgres!');
       expect(res.body.message.sender_username).toBe(user1.username);
     });
 

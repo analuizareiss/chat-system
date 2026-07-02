@@ -5,7 +5,6 @@
  */
 const request = require('supertest');
 
-// Aponta para banco de teste dedicado
 process.env.DATABASE_URL = process.env.TEST_DATABASE_URL
   || process.env.DATABASE_URL
   || 'postgresql://chat:chat_pass@localhost:5432/chatdb_test';
@@ -15,7 +14,6 @@ const app = require('../index');
 
 beforeAll(async () => {
   await initDatabase();
-  // Limpa dados de testes anteriores
   await pool.query('TRUNCATE users, refresh_tokens CASCADE');
 });
 

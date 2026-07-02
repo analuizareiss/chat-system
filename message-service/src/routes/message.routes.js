@@ -5,7 +5,6 @@ const messageModel = require('../models/message.model');
 const router = express.Router();
 router.use(authMiddleware);
 
-// GET /api/rooms
 router.get('/rooms', async (req, res) => {
   try {
     const rooms = await messageModel.getUserRooms(req.user.userId);
@@ -16,7 +15,6 @@ router.get('/rooms', async (req, res) => {
   }
 });
 
-// POST /api/rooms/direct
 router.post('/rooms/direct', async (req, res) => {
   const { targetUserId, targetUsername } = req.body;
   if (!targetUserId) return res.status(400).json({ error: 'targetUserId required' });
@@ -48,7 +46,6 @@ router.post('/rooms/direct', async (req, res) => {
   }
 });
 
-// POST /api/rooms/group
 router.post('/rooms/group', async (req, res) => {
   const { name, memberIds } = req.body;
   if (!name || !memberIds?.length) {
@@ -80,7 +77,6 @@ router.post('/rooms/group', async (req, res) => {
   }
 });
 
-// GET /api/rooms/:roomId/messages
 router.get('/rooms/:roomId/messages', async (req, res) => {
   const { roomId } = req.params;
   const { limit = 50, before } = req.query;
@@ -97,7 +93,6 @@ router.get('/rooms/:roomId/messages', async (req, res) => {
   }
 });
 
-// POST /api/rooms/:roomId/messages
 router.post('/rooms/:roomId/messages', async (req, res) => {
   const { roomId } = req.params;
   const { content } = req.body;
