@@ -3,37 +3,38 @@
 
 ## Arquitetura
 
+```text
 +--------------------------------------------------+
-|                   FRONTEND                        |
-|         React + Vite (porta 5173)                 |
-|    WebSocket (Socket.IO) + REST (Axios)           |
+|                   FRONTEND                       |
+|           React + Vite (porta 5173)              |
+|     WebSocket (Socket.IO) + REST (Axios)         |
 +--------------------+-----------------------------+
                      |
                      v
             +-----------------+
-            |    nginx-lb      |   (porta 8080)
-            | Load Balancer    |   round-robin entre replicas
+            |    nginx-lb     |   (porta 8080)
+            | Load Balancer   |   round-robin entre replicas
             +----+--------+---+
                  |        |
         +--------+        +--------+
         v                          v
 +------------------+     +----------------------+
-|  auth-service    |     |  message-service      |
-|  (N replicas)    |     |  (N replicas)         |
-|  Express.js      |     |  Express + Socket.IO  |
+|  auth-service    |     |  message-service     |
+|  (N replicas)    |     |  (N replicas)        |
+|  Express.js      |     |  Express + Socket.IO |
 +--------+---------+     +-------+----------+----+
          |                       |          |
          |                       |          v
          |                       |     +---------+
-         |                       |     |  Redis   |
+         |                       |     |  Redis  |
          |                       |     +---------+
-         |                       |
          +-----------+-----------+
                      v
             +------------------+
-            |   PostgreSQL 16   |
-            |   banco: chatdb   |
+            |   PostgreSQL 16  |
+            |   banco: chatdb  |
             +------------------+
+```
 
 ### Stack tecnologica
 - **Backend:** Node.js + Express.js
